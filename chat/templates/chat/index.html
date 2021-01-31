@@ -1,0 +1,66 @@
+{% extends 'chat/base.html' %}
+{% block body_block %}
+<style>
+    body {
+        background: #2F4F4F;
+    }
+    .header {
+        color: #D5DCDC;
+        font-size: x-large;
+    }
+    #room-name-submit {
+        cursor: pointer !important;
+    }
+    #room-name-input {
+        cursor: auto;
+    }
+    #room-name-input {
+        box-shadow: none;
+    }
+    #room-name-submit:hover {
+        background: #2F4F4F;
+        color: white;
+    }
+    .error-message {
+        font-size: x-large;
+    }
+</style>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8 mb-3">
+            <h1 class="text-center header">Write the room name you like to join</h1>
+        </div>
+    </div>
+    <div class="row d-flex flex-row justify-content-center">
+        <div class="col-md-8 d-flex">
+            <input class="form-control" id="room-name-input" type="text">
+            <input id="room-name-submit" type="button" value="Enter">
+        </div>
+        <div class="col-md-8 mt-4">
+            <p class="text-monospace text-center text-danger font-weight-bold error-message"></p>
+        </div>
+    </div>
+</div>
+{% endblock body_block %}
+{% block scripts %}
+<script>
+    document.title = "Chat Room";
+    document.querySelector('#room-name-input').focus();
+    document.querySelector('#room-name-input').onkeyup = function(e) {
+        if (e.keyCode === 13) {  // enter, return
+            document.querySelector('#room-name-submit').click();
+        }
+    };
+
+    document.querySelector('#room-name-submit').onclick = function(e) {
+        var roomName = document.querySelector('#room-name-input').value;
+        if(!roomName) {
+            e.preventDefault();
+            document.querySelector('.error-message').innerHTML = "Room name can not be blank";
+        }
+        else{
+            window.location.pathname = '/chat/' + roomName + '/';
+        }
+    };
+</script>
+{% endblock scripts %}

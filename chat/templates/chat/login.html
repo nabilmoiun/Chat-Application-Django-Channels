@@ -1,0 +1,62 @@
+{% extends 'chat/base.html' %}
+{% block body_block %}
+<style>
+    .login-button:hover {
+        background: #20B2AA !important;
+        color: white !important;
+    }
+    .signup-link {
+        text-decoration: none !important;
+        font-size: larger;
+    }
+    .signup-link:hover {
+        text-decoration-line: underline !important;
+        text-decoration-color: white !important;
+    }
+</style>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <h2 class="text-center display-4 header">Join the chat room</h2>
+            </div>
+        </div>
+        {% if messages %}
+        {% for message in messages %}
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div>
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        <strong>{{ message }}</strong>
+                      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+        <form class="row my-3 justify-content-center login-form" action="{% url 'login' %}" method="POST">
+            {% csrf_token %}
+            <div class="form-group col-md-8">
+                <input class="form-control" type="text" name="username" placeholder="Enter username" required>
+            </div>
+            <div class="form-group col-md-8">
+                <input class="form-control" type="password" name="password" placeholder="Enter password" required>
+            </div>
+            <div class="form-group col-md-8">
+                <button type="submit" class="btn btn-secondary btn-block login-button">Login</button>
+            </div>
+            <div class="form-group col-md-5 mt-1 text-center text-white">
+                <a class="text-decoration-none text-white signup-link" href="{% url 'signup' %}">Create new account</a>
+            </div>
+        </form>
+    </div>
+{% endblock body_block %}
+{% block scripts %}
+<script>
+    document.title = "Login";
+    document.body.style.background = "#2F4F4F";
+    document.querySelector('.header').style.color = "#D5DCDC";
+</script>
+{% endblock scripts %}

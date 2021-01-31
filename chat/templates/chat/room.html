@@ -1,0 +1,168 @@
+{% extends 'chat/base.html' %}
+{% block body_block %}
+<div id="frame">
+    <!-- Side Panel !-->
+
+	<div id="sidepanel">
+		<div id="profile">
+			<div class="wrap">
+				<img id="profile-img" src="http://emilcarlsson.se/assets/mikeross.png" class="online" alt="" />
+				<p>{{user.username}}</p>
+				<i class="fa fa-chevron-down expand-button" aria-hidden="true"></i>
+				<div id="status-options">
+					<ul>
+						<li id="status-online" class="active"><span class="status-circle"></span> <p>Online</p></li>
+						<li id="status-away"><span class="status-circle"></span> <p>Away</p></li>
+						<li id="status-busy"><span class="status-circle"></span> <p>Busy</p></li>
+						<li id="status-offline"><span class="status-circle"></span> <p>Offline</p></li>
+					</ul>
+				</div>
+				<div id="expanded">
+					<a class="text-decoration-none text-monospace text-warning" href="{% url 'logout' %}">
+						<i class="fa fa-sign-out" aria-hidden="true"></i>
+						Leave
+					</a>
+				</div>
+			</div>
+		</div>
+		<div id="search">
+			<label for=""><i class="fa fa-search" aria-hidden="true"></i></label>
+			<input type="text" placeholder="Search rooms..." />
+		</div>
+		<div id="contacts">
+			<ul>
+				{% for room in rooms %}
+				<!-- Romove active from class to set offline-->
+				<a class="text-decoration-none" href="{% url 'room' room_name=room.room_name %}">
+					<li class="contact active text-white" style="cursor: pointer;">
+						<div class="wrap">
+							<span class="contact-status busy"></span>
+							<img src="http://emilcarlsson.se/assets/harveyspecter.png" alt="" />
+							<div class="meta">
+									<p class="name text-white">{{room.room_name}}</p>
+								<p class="preview">Wrong. You take the gun, or you pull out a bigger one. Or, you call their bluff. Or, you do any one of a hundred and forty six other things.</p>
+							</div>
+						</div>
+					</li>	
+				</a>
+				{% endfor %}
+			</ul>
+		</div>
+		<div id="bottom-bar">
+			<button id="addcontact"><i class="fa fa-user-plus fa-fw" aria-hidden="true"></i> <span>Add contact</span></button>
+			<button id="settings"><i class="fa fa-cog fa-fw" aria-hidden="true"></i> <span>Settings</span></button>
+		</div>
+	</div>
+
+    <!--Side panel ends !-->
+
+
+
+    <!-- Chat message section !-->
+	<div class="content">
+		<div class="contact-profile">
+			<img src="http://emilcarlsson.se/assets/harveyspecter.png" alt="" />
+			<p>{{user.username}}</p>
+			<div class="social-media">
+				<!-- <i class="fa fa-facebook" aria-hidden="true"></i> -->
+				<!-- <i class="fa fa-twitter" aria-hidden="true"></i>
+				 <i class="fa fa-instagram" aria-hidden="true"></i> -->
+				 <span class="lead pr-4">{{room_name}}</span>
+				 <a class="text-decoration-none">
+					<i class="fa fa-phone" aria-hidden="true"></i>
+				 </a>
+			</div>
+		</div>
+		<div class="messages">
+			<ul class="chat-message-list pb-5">
+				{% for message in room_messages %}
+				{% if message.author.username == username %}
+				<li class="sent">
+					<img src="http://emilcarlsson.se/assets/mikeross.png" alt="" />
+					<p>{{message.message}}</p>
+				</li>
+				{% else %}
+				<li class="replies">
+					<img src="http://emilcarlsson.se/assets/harveyspecter.png" alt="" />
+					<p>{{message.message}}</p>
+				</li>
+				{% endif %}
+
+				{% endfor %}
+			</ul>
+		</div>
+
+        <!-- Chat message section ends !-->
+		<div class="message-input">
+		<div class="wrap d-flex flex-nowrap">
+		<input id="chat-message-input" type="text" placeholder="Write your message..." />
+			<input id="chat-message-submit" type="button" value="Send">
+			{{ room_name|json_script:"room-name" }}
+		</div>
+	</div>
+
+	</div>
+</div>
+{% endblock body_block %}
+{% block scripts %}
+    <script>
+        console.log("{{username}}");
+        const roomName = JSON.parse(document.getElementById('room-name').textContent);
+        const chatSocket = new ReconnectingWebSocket(
+            'ws://'
+            + window.location.host
+            + '/ws/chat/'
+            + roomName
+            + '/'
+		);
+		
+		function createMessage(data) {
+			let li = document.createElement('li');
+			console.log('data sent is: ', data);
+			if(data.author === "{{username}}") {
+				li.className = "sent";
+			}
+			else {
+				li.className = "replies";
+			}
+			let image = document.createElement('img');
+			image.src = 'http://emilcarlsson.se/assets/mikeross.png';
+			let message = document.createElement('p');
+			message.textContent = `${data.message}`;
+			li.appendChild(image);
+			li.appendChild(message);
+			console.log(li);
+			return li;
+		}
+
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+			const messages = document.querySelector('.chat-message-list');
+			let newMessage = createMessage(data);
+			messages.appendChild(newMessage);
+        };
+
+        chatSocket.onclose = function(e) {
+            console.error('Chat socket closed unexpectedly');
+        };
+
+        document.querySelector('#chat-message-input').focus();
+        document.querySelector('#chat-message-input').onkeyup = function(e) {
+            if (e.keyCode === 13) {  // enter, return
+                document.querySelector('#chat-message-submit').click();
+            }
+        };
+
+        document.querySelector('#chat-message-submit').onclick = function(e) {
+            const messageInputDom = document.querySelector('#chat-message-input');
+            const message = messageInputDom.value;
+            chatSocket.send(JSON.stringify({
+                'message': message,
+                'command': 'new-message',
+                'user': "{{username}}",
+				'room_name': "{{room_name}}"
+            }));
+            messageInputDom.value = '';
+        };
+	</script>
+	{% endblock scripts %}

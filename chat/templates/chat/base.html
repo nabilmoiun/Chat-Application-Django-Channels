@@ -1,0 +1,15 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+{% include 'chat/head.html' %}
+<body>
+    
+    {% block body_block %}
+    {% endblock body_block %}
+    
+    {% include 'chat/scripts.html' %}
+    
+    {% block scripts %}
+    {% endblock %}
+</body>
+</html>
