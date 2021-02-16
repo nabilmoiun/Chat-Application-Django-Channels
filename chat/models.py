@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -19,3 +20,22 @@ class Messages(models.Model):
     def __str__(self):
         return self.message[:20]
 
+
+class UserToUserConnection(models.Model):
+    connection_id = models.CharField(max_length=500)
+    users = models.ManyToManyField(User)
+    messages = models.ManyToManyField('UserMessages')
+    created_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.connection_id
+
+
+class UserMessages(models.Model):
+    message = models.TextField(null=True, blank=True)
+    connection = models.ForeignKey(UserToUserConnection, related_name='userMessages', on_delete=models.CASCADE)
+    sender = models.ForeignKey(User, related_name='userMessages', on_delete=models.CASCADE)
+    created_date = models.DateTimeField(auto_now_add=True)
+
+    def __set__(self):
+        return self.message

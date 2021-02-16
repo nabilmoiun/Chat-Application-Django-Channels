@@ -1,16 +1,18 @@
 import json
+import datetime
 
 from django.contrib import messages
 from django.views.generic import View
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
+from django.core.exceptions import ObjectDoesNotExist
 
 from django.utils.safestring import mark_safe
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 
 from .forms import SignupForm
-from .models import Messages, Room
+from .models import Messages, Room, UserToUserConnection, UserMessages
 from django.contrib.auth.models import User
 from .decorators import is_user_authenticated
 
@@ -22,6 +24,7 @@ def index(request):
 
 @login_required
 def room(request, room_name):
+    users = User.objects.exclude(pk=request.user.pk)
     user = User.objects.get(pk=request.user.pk)
     room, created = Room.objects.get_or_create(room_name=room_name)
     if created:
@@ -34,7 +37,8 @@ def room(request, room_name):
         'user': user,
         'username': request.user.username,
         'room_messages': messages,
-        'rooms': rooms
+        'rooms': rooms,
+        'users': users
     })
 
 
@@ -68,3 +72,37 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect('login')
+
+
+@login_required
+def connection(request, connection_id):
+    usernames = connection_id.split('.')
+    users = User.objects.exclude(pk=request.user.pk)
+    user1 = User.objects.get(username=usernames[0])
+    user2 = User.objects.get(username=usernames[1])
+    time = datetime.datetime.now()
+    rooms = Room.objects.all()
+    connection = UserToUserConnection.objects.filter(connection_id=connection_id)
+    if not connection.exists():
+        connection = UserToUserConnection.objects.create(
+            connection_id=connection_id
+        )
+        connection.users.add(user1)
+        connection.users.add(user2)
+        connection.save()
+    else:
+        connection = connection[0]
+        if request.user not in connection.users.all():
+            return redirect('index')
+
+    messages = connection.messages.all()
+    context = {
+        "users": users,
+        "connection_id": connection_id,
+        "user": request.user,
+        "username": request.user.username,
+        "messages": messages,
+        "rooms": rooms
+    }
+    return render(request, 'chat/user.html', context)
+    

@@ -47,7 +47,7 @@
 				</a>
 				{% endfor %}
 			</ul>
-			<!--Users-->
+			<!-- Users -->
 			<div class="text-center my-4">
 				<p class="lead text-danger">Users</p>
 			</div>
@@ -81,8 +81,6 @@
 
     <!--Side panel ends !-->
 
-
-
     <!-- Chat message section !-->
 	<div class="content">
 		<div class="contact-profile">
@@ -100,8 +98,8 @@
 		</div>
 		<div class="messages">
 			<ul class="chat-message-list pb-5">
-				{% for message in room_messages %}
-				{% if message.author.username == username %}
+				{% for message in messages %}
+				{% if message.sender.username == username %}
 				<li class="sent">
 					<img src="http://emilcarlsson.se/assets/mikeross.png" alt="" />
 					<p>{{message.message}}</p>
@@ -122,7 +120,7 @@
 		<div class="wrap d-flex flex-nowrap">
 		<input id="chat-message-input" type="text" placeholder="Write your message..." />
 			<input id="chat-message-submit" type="button" value="Send">
-			{{ room_name|json_script:"room-name" }}
+			{{ connection_id|json_script:"connection_id" }}
 		</div>
 	</div>
 
@@ -132,12 +130,14 @@
 {% block scripts %}
     <script>
         console.log("{{username}}");
-        const roomName = JSON.parse(document.getElementById('room-name').textContent);
+        let connection_id = JSON.parse(document.getElementById('connection_id').textContent);
+		// connection_id = "{{connection_id}}";
+		console.log(connection_id);
         const chatSocket = new ReconnectingWebSocket(
             'ws://'
             + window.location.host
-            + '/ws/chat/'
-            + roomName
+            + '/ws/chat/user/'
+            + connection_id
             + '/'
 		);
 		
@@ -185,7 +185,7 @@
                 'message': message,
                 'command': 'new-message',
                 'user': "{{username}}",
-				'room_name': "{{room_name}}"
+				'connection_id': "{{connection_id}}"
             }));
             messageInputDom.value = '';
         };
