@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django.db.models import Q
 from django.core.exceptions import ValidationError
 
 class SignupForm(UserCreationForm):
@@ -17,6 +18,6 @@ class SignupForm(UserCreationForm):
 
     def clean(self):
         username = self.cleaned_data['username']
-        if User.objects.filter(username=username).exists():
+        if User.objects.filter(Q(username__icontains=username)).exists():
             raise ValidationError("Username already exists")
         return self.cleaned_data

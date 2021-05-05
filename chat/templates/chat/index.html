@@ -28,7 +28,7 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8 mb-3">
-            <h1 class="text-center header">Write the room name you like to join</h1>
+            <h1 class="text-center header">Which room would you like to create or join</h1>
         </div>
     </div>
     <div class="row d-flex flex-row justify-content-center">
@@ -38,6 +38,21 @@
         </div>
         <div class="col-md-8 mt-4">
             <p class="text-monospace text-center text-danger font-weight-bold error-message"></p>
+        </div>
+    </div>
+    <div class="row my-4 justify-content-center">
+        <div class="col-md-8">
+            <div class="dropdown">
+                <a class="btn btn-secondary btn-block dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  Available Rooms
+                </a>
+              
+                <div class="dropdown-menu text-center"  style="width: 100%;" aria-labelledby="dropdownMenuLink">
+                    {% for room in rooms %}
+                    <a class="dropdown-item" href="{% url 'room' room_name=room.room_name%}">{{room.room_name}}</a>
+                    {% endfor %}
+                </div>
+              </div>
         </div>
     </div>
 </div>

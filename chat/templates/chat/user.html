@@ -54,11 +54,7 @@
 			<ul>
 				{% for user in users %}
 				<!-- Romove active from class to set offline-->
-				{% if user.id < request.user.id %}
-				<a class="text-decoration-none" href="{% url 'user_connection' connection_id=user.username|add:'.'|add:request.user.username%}">
-				{% else %}
-					<a class="text-decoration-none" href="{% url 'user_connection' connection_id=request.user.username|add:'.'|add:user.username%}">
-				{% endif %}
+				<a class="text-decoration-none" href="{% url 'user_connection' username=user.username %}">
 					<li class="contact active text-white" style="cursor: pointer;">
 						<div class="wrap">
 							<span class="contact-status busy"></span>
@@ -85,7 +81,7 @@
 	<div class="content">
 		<div class="contact-profile">
 			<img src="http://emilcarlsson.se/assets/harveyspecter.png" alt="" />
-			<p>{{user.username}}</p>
+			<p>{{connecting_to}}</p>
 			<div class="social-media">
 				<!-- <i class="fa fa-facebook" aria-hidden="true"></i> -->
 				<!-- <i class="fa fa-twitter" aria-hidden="true"></i>
@@ -121,6 +117,7 @@
 		<input id="chat-message-input" type="text" placeholder="Write your message..." />
 			<input id="chat-message-submit" type="button" value="Send">
 			{{ connection_id|json_script:"connection_id" }}
+			{{ connecting_to|json_script:"connecting_to" }}
 		</div>
 	</div>
 
@@ -129,8 +126,10 @@
 {% endblock body_block %}
 {% block scripts %}
     <script>
+		console.log("comming here................");
         console.log("{{username}}");
-        let connection_id = JSON.parse(document.getElementById('connection_id').textContent);
+        // let connection_id = JSON.parse(document.getElementById('connection_id').textContent);
+        let connection_id = JSON.parse(document.getElementById('connecting_to').textContent);
 		// connection_id = "{{connection_id}}";
 		console.log(connection_id);
         const chatSocket = new ReconnectingWebSocket(

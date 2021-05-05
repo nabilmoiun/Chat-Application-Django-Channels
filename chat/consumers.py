@@ -8,6 +8,7 @@ from channels.generic.websocket import WebsocketConsumer
 
 from django.contrib.auth.models import User
 from .models import Messages, Room, UserToUserConnection, UserMessages
+from .utilities import generate_connection_id
 
 
 class ChatConsumer(WebsocketConsumer):
@@ -74,16 +75,16 @@ class ChatConsumer(WebsocketConsumer):
 # One to one chat
 class ChatConsumerUserToUser(WebsocketConsumer):
     def connect(self):
-        self.connection_id = self.scope['url_route']['kwargs']['connection_id']
-        print(self.scope['url_route']['kwargs'])
-        self.connection_name = 'chat_user_%s' % self.connection_id
         self.user = self.scope['user']
-        print("connection id ", self.connection_id)
+        self.username = self.scope['url_route']['kwargs']['username']
+        self.connection_id = generate_connection_id(self.user.username, self.username)
+        user1 = User.objects.get(username=self.user.username)
+        user2 = User.objects.get(username=self.username)
+        self.connection_name = 'chat_user_%s' % self.connection_id
         connection = UserToUserConnection.objects.get(connection_id=self.connection_id)
-        print("users in connection", connection.users.all())
         user = self.user in connection.users.all()
         if not user:
-            print(f"{self.user} ------is not connected--------")
+            print(f"{self.user} is not connected")
             async_to_sync(self.channel_layer.group_discard)(
             self.connection_name,
             self.channel_name
@@ -91,7 +92,7 @@ class ChatConsumerUserToUser(WebsocketConsumer):
             self.close()
             return redirect('/')
         else:
-            print(f"{self.user} ------is connected--------")
+            print(f"{self.user} is connected")
             async_to_sync(self.channel_layer.group_add)(
                 self.connection_name,
                 self.channel_name

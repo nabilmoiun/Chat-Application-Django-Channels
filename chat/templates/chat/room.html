@@ -40,7 +40,7 @@
 							<img src="http://emilcarlsson.se/assets/harveyspecter.png" alt="" />
 							<div class="meta">
 									<p class="name text-white">{{room.room_name}}</p>
-								<p class="preview">Wrong. You take the gun, or you pull out a bigger one. Or, you call their bluff. Or, you do any one of a hundred and forty six other things.</p>
+								<p class="preview">Wrong. You take the gun, or you pull out a bigger one. Or, you call their bluff. Or, you do an.</p>
 							</div>
 						</div>
 					</li>	
@@ -54,11 +54,7 @@
 			<ul>
 				{% for user in users %}
 				<!-- Romove active from class to set offline-->
-				{% if user.id < request.user.id %}
-				<a class="text-decoration-none" href="{% url 'user_connection' connection_id=user.username|add:'.'|add:request.user.username%}">
-				{% else %}
-					<a class="text-decoration-none" href="{% url 'user_connection' connection_id=request.user.username|add:'.'|add:user.username%}">
-				{% endif %}
+				<a class="text-decoration-none" href="{% url 'user_connection' username=user.username %}">
 					<li class="contact active text-white" style="cursor: pointer;">
 						<div class="wrap">
 							<span class="contact-status busy"></span>
@@ -68,7 +64,7 @@
 								<p class="preview">Wrong. You take the gun, or you pull out a bigger one. Or, you call their bluff. Or, you do any one of a hundred and forty six other things.</p>
 							</div>
 						</div>
-					</li>	
+					</li>
 				</a>
 				{% endfor %}
 			</ul>

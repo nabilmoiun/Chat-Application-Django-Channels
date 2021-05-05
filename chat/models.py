@@ -37,5 +37,5 @@ class UserMessages(models.Model):
     sender = models.ForeignKey(User, related_name='userMessages', on_delete=models.CASCADE)
     created_date = models.DateTimeField(auto_now_add=True)
 
-    def __set__(self):
+    def __str__(self):
         return self.message

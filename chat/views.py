@@ -15,11 +15,13 @@ from .forms import SignupForm
 from .models import Messages, Room, UserToUserConnection, UserMessages
 from django.contrib.auth.models import User
 from .decorators import is_user_authenticated
+from .utilities import generate_connection_id
 
 
 @login_required
 def index(request):
-    return render(request, 'chat/index.html', {})
+    rooms = Room.objects.all()
+    return render(request, 'chat/index.html', {"rooms": rooms})
 
 
 @login_required
@@ -75,11 +77,13 @@ def logout_view(request):
 
 
 @login_required
-def connection(request, connection_id):
-    usernames = connection_id.split('.')
+def connection(request, username):
+    connection_id = generate_connection_id(request.user.username, username)
     users = User.objects.exclude(pk=request.user.pk)
-    user1 = User.objects.get(username=usernames[0])
-    user2 = User.objects.get(username=usernames[1])
+    # connected by
+    user1 = User.objects.get(username=request.user.username)
+    # connecting to
+    user2 = User.objects.get(username=username)
     time = datetime.datetime.now()
     rooms = Room.objects.all()
     connection = UserToUserConnection.objects.filter(connection_id=connection_id)
@@ -97,6 +101,7 @@ def connection(request, connection_id):
 
     messages = connection.messages.all()
     context = {
+        'connecting_to': username,
         "users": users,
         "connection_id": connection_id,
         "user": request.user,
